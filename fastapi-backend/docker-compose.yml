@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgis/postgis:15-3.3
+    container_name: kisan-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: kisan_guru_admin
+      POSTGRES_PASSWORD: kisan_secure_db_pass_2026
+      POSTGRES_DB: kisan_guru_prod
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kisan_guru_admin -d kisan_guru_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-cache:
+    image: redis:7.2-alpine
+    container_name: kisan-redis
+    restart: always
+    command: redis-server --requirepass kisan_secure_redis_pass_2026
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "kisan_secure_redis_pass_2026", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kisan-api
+    restart: always
+    environment:
+      - ENV=development
+      - DEBUG=true
+      - SECRET_KEY=9a7c36192db84b2e88a562137bc0f70c3298a8342718e809cd8015c928de6840
+      - POSTGRES_USER=kisan_guru_admin
+      - POSTGRES_PASSWORD=kisan_secure_db_pass_2026
+      - POSTGRES_DB=kisan_guru_prod
+      - POSTGRES_HOST=postgres-db
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis-cache
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=kisan_secure_redis_pass_2026
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kisan-worker
+    command: celery -A app.workers.celery_app.celery worker --loglevel=info
+    restart: always
+    environment:
+      - ENV=development
+      - POSTGRES_USER=kisan_guru_admin
+      - POSTGRES_PASSWORD=kisan_secure_db_pass_2026
+      - POSTGRES_DB=kisan_guru_prod
+      - POSTGRES_HOST=postgres-db
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis-cache
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=kisan_secure_redis_pass_2026
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

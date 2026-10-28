@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80" />
+      <stop offset="50%" stop-color="#16a34a" />
+      <stop offset="100%" stop-color="#15803d" />
+    </linearGradient>
+    <filter id="rustEffect">
+      <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="4" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0.9  0 1 0 0 0.6  0 0 1 0 0.1  0 0 0 1 0" />
+    </filter>
+  </defs>
+  <rect width="400" height="300" fill="#0f172a" />
+  <!-- Wheat Leaf Blade -->
+  <path d="M 50 260 C 120 220 280 180 360 40 C 260 90 120 180 50 260 Z" fill="url(#leafGrad)" stroke="#22c55e" stroke-width="2"/>
+  <!-- Leaf Vein -->
+  <path d="M 50 260 C 140 210 260 140 360 40" stroke="#86efac" stroke-width="3" fill="none" opacity="0.6"/>
+  <!-- Rust Pustules (Orange/Yellow Stripe Rust) -->
+  <g fill="#f59e0b" opacity="0.85">
+    <ellipse cx="140" cy="200" rx="18" ry="4" transform="rotate(-30 140 200)" />
+    <ellipse cx="165" cy="185" rx="22" ry="5" transform="rotate(-32 165 185)" />
+    <ellipse cx="190" cy="170" rx="26" ry="6" transform="rotate(-33 190 170)" fill="#d97706" />
+    <ellipse cx="215" cy="155" rx="20" ry="5" transform="rotate(-35 215 155)" />
+    <ellipse cx="240" cy="138" rx="24" ry="5" transform="rotate(-36 240 138)" fill="#b45309" />
+    <ellipse cx="270" cy="115" rx="18" ry="4" transform="rotate(-38 270 115)" />
+    <!-- Secondary cluster -->
+    <ellipse cx="170" cy="198" rx="14" ry="3" transform="rotate(-30 170 198)" fill="#fbbf24" />
+    <ellipse cx="200" cy="180" rx="16" ry="4" transform="rotate(-32 200 180)" fill="#f59e0b" />
+    <ellipse cx="230" cy="160" rx="15" ry="4" transform="rotate(-34 230 160)" fill="#d97706" />
+  </g>
+  <text x="20" y="30" font-family="sans-serif" font-size="14" font-weight="bold" fill="#f8fafc">Wheat Leaf - Stripe Rust (Puccinia striiformis)</text>
+</svg>

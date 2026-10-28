@@ -1,0 +1,48 @@
+name: kisan_guru_ai
+description: "Kisan Guru AI: Enterprise-Grade AI-Powered Smart Farming Mobile Ecosystem"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management & Architecture
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+
+  # Networking & Caching
+  dio: ^5.5.0
+  sqflite: ^2.3.3
+  flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.2.3
+
+  # Audio & Speech AI (Whisper/TTS bindings)
+  speech_to_text: ^6.6.0
+  flutter_tts: ^4.0.2
+
+  # Location, Map, and Geolocation (For Machinery Rental geo-queries)
+  geolocator: ^11.0.0
+  google_maps_flutter: ^2.6.2
+
+  # Utilities
+  uuid: ^4.4.0
+  intl: ^0.19.0
+  path_provider: ^2.1.3
+  logger: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icons/
+    - assets/images/
+    - assets/models/

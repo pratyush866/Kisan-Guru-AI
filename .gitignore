@@ -1,0 +1,54 @@
+# Environment files and credentials (CRITICAL: Do not commit secrets)
+.env
+*.env
+**/.env
+!.env.example
+!**/.env.example
+
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+**/.venv/
+**/venv/
+**/env/
+
+# Python cache & bytecode
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+**/.pytest_cache/
+
+# Databases & local stores
+*.db
+*.sqlite
+*.sqlite3
+fastapi-backend/kisan_guru_dev.db
+
+# Logs & temp test outputs
+*.log
+error.txt
+**/error.txt
+pytest_*output.txt
+**/pytest_*output.txt
+test_results.txt
+**/test_results.txt
+
+# Node / Web dependencies
+node_modules/
+**/node_modules/
+dist/
+build/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Accidental duplicate folders
+Kisan%20Gurur%20AI/

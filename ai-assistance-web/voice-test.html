@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kisan Guru AI - Voice Assistant Diagnostic Test Console</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+      padding: 2rem;
+    }
+    .card {
+      background: #1e293b;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      max-width: 800px;
+      margin: 0 auto;
+      border: 1px solid #334155;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    h1 { color: #38bdf8; font-size: 1.5rem; margin-top: 0; }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .badge-idle { background: #334155; color: #94a3b8; }
+    .badge-listening { background: #991b1b; color: #fca5a5; animation: pulse 1.5s infinite; }
+    .badge-speaking { background: #166534; color: #86efac; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .btn {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .btn:hover { background: #0369a1; }
+    .btn-danger { background: #dc2626; }
+    .btn-danger:hover { background: #b91c1c; }
+    .log-box {
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      height: 220px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #38bdf8;
+      margin-top: 1rem;
+    }
+    .grid { display: grid; grid-template-cols: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    select {
+      background: #334155;
+      color: white;
+      border: 1px solid #475569;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Kisan Guru AI - Voice Assistant Diagnostic Test Page</h1>
+    <div id="status-badge" class="badge badge-idle">Status: Idle</div>
+
+    <div class="grid">
+      <div>
+        <label>Speech Recognition Language:</label>
+        <select id="lang-select">
+          <option value="en-IN">English (India) [en-IN]</option>
+          <option value="hi-IN">Hindi (India) [hi-IN]</option>
+          <option value="hi-IN">Bhojpuri (Fallback hi-IN)</option>
+        </select>
+      </div>
+      <div>
+        <label>Microphone Permission Status:</label>
+        <div id="mic-perm" style="padding: 0.5rem; font-weight: bold; color: #fbbf24;">Unknown</div>
+      </div>
+    </div>
+
+    <div>
+      <button id="btn-start-mic" class="btn">🎤 Start Microphone (ASR)</button>
+      <button id="btn-stop-mic" class="btn btn-danger">🛑 Stop Listening</button>
+      <button id="btn-test-tts" class="btn">🔊 Test Text-to-Speech (TTS)</button>
+    </div>
+
+    <div style="margin-top: 1rem;">
+      <label>Last Transcribed Speech (ASR Result):</label>
+      <input type="text" id="transcript-input" style="width: 100%; padding: 0.5rem; border-radius: 0.5rem; background: #334155; border: 1px solid #475569; color: white; margin-top: 0.25rem;" placeholder="Speech transcription will appear here...">
+    </div>
+
+    <div class="log-box" id="console-log">
+      <div>[SYSTEM] Voice assistant diagnostic console initialized.</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { UseSpeech } from './src/hooks/useSpeech.js';
+    import { context } from './src/context/AppContext.js';
+
+    const logEl = document.getElementById('console-log');
+    const badgeEl = document.getElementById('status-badge');
+    const micPermEl = document.getElementById('mic-perm');
+    const transcriptInput = document.getElementById('transcript-input');
+
+    function log(msg) {
+      const time = new Date().toLocaleTimeString();
+      logEl.innerHTML += `<div>[${time}] ${msg}</div>`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // Check microphone permission
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          micPermEl.textContent = 'GRANTED';
+          micPermEl.style.color = '#4ade80';
+          log('Microphone access granted by browser.');
+          stream.getTracks().forEach(track => track.stop());
+        })
+        .catch(err => {
+          micPermEl.textContent = 'DENIED / ERROR: ' + err.name;
+          micPermEl.style.color = '#f87171';
+          log('Microphone error: ' + err.message);
+        });
+    }
+
+    const speechHandler = new UseSpeech(
+      (transcript) => {
+        log('ASR Result Captured: "' + transcript + '"');
+        transcriptInput.value = transcript;
+        badgeEl.className = 'badge badge-idle';
+        badgeEl.textContent = 'Status: Idle';
+      },
+      (error) => {
+        log('ASR Error: ' + error);
+        badgeEl.className = 'badge badge-idle';
+        badgeEl.textContent = 'Status: Error - ' + error;
+      }
+    );
+
+    document.getElementById('btn-start-mic').addEventListener('click', () => {
+      const lang = document.getElementById('lang-select').value;
+      if (speechHandler.recognition) {
+        speechHandler.recognition.lang = lang;
+      }
+      log('Starting speech recognition in language: ' + lang);
+      badgeEl.className = 'badge badge-listening';
+      badgeEl.textContent = 'Status: Listening...';
+      speechHandler.start();
+    });
+
+    document.getElementById('btn-stop-mic').addEventListener('click', () => {
+      log('Stopping speech recognition...');
+      speechHandler.stop();
+      badgeEl.className = 'badge badge-idle';
+      badgeEl.textContent = 'Status: Stopped';
+    });
+
+    document.getElementById('btn-test-tts').addEventListener('click', () => {
+      const text = transcriptInput.value || "Kisan Guru AI welcomes you. Weather is clear and wheat crops are healthy.";
+      log('Triggering Text-to-Speech for: "' + text + '"');
+      badgeEl.className = 'badge badge-speaking';
+      badgeEl.textContent = 'Status: Speaking...';
+      
+      UseSpeech.speakResponse(
+        text,
+        'english',
+        () => log('TTS Playback Started.'),
+        () => {
+          log('TTS Playback Finished.');
+          badgeEl.className = 'badge badge-idle';
+          badgeEl.textContent = 'Status: Idle';
+        },
+        (err) => {
+          log('TTS Error: ' + err);
+          badgeEl.className = 'badge badge-idle';
+          badgeEl.textContent = 'Status: Error';
+        }
+      );
+    });
+  </script>
+</body>
+</html>
